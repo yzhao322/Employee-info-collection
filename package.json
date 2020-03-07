@@ -1,0 +1,24 @@
+{
+  "name": "Employee-info-collection",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yzhao322/Employee-info-collection.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yzhao322/Employee-info-collection/issues"
+  },
+  "homepage": "https://github.com/yzhao322/Employee-info-collection#readme",
+  "dependencies": {
+    "inquirer": "^7.0.5",
+    "mysql": "^2.18.1"
+  }
+}
