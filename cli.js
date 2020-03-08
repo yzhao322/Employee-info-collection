@@ -13,7 +13,7 @@ const init = function () {
         type: "list",
         message: "What would you like to do?",
         name: "updateOrView",
-        choices: ["View Profile", "Update Profile"]
+        choices: ["View Profile", "Update Profile", "Exit"]
     })
         .then((data) => {
             if (data.updateOrView === "View Profile") {
@@ -21,7 +21,7 @@ const init = function () {
                     type: "list",
                     message: "How would you like to view profiles?",
                     name: "viewProfiles",
-                    choices: ["View All Employees", "View Employees by Department", "View Employees by Manager"]
+                    choices: ["View All Employees", "View Employees by Department", "View Employees by Manager", "Exit"]
                 })
                     .then((data) => {
                         if (data.viewProfiles === "View All Employees") {
@@ -33,6 +33,9 @@ const init = function () {
                         else if (data.viewProfiles === "View Employees by Manager") {
                             viewEmployeebyManger();
                         }
+                        else {
+                            process.exit();
+                        }
 
                     })
             }
@@ -41,7 +44,7 @@ const init = function () {
                     type: "list",
                     message: "How would you like to update profiles?",
                     name: "updateProfiles",
-                    choices: ["Add to Profile", "Remove From Profile", "Update Profile"]
+                    choices: ["Add to Profile", "Remove From Profile", "Update Profile", "Exit"]
                 })
                     .then((data) => {
                         if (data.updateProfiles === "Add to Profile") {
@@ -60,6 +63,9 @@ const init = function () {
                                 else if (answer.AddProfile === "Add Roles") {
                                     addRoles();
                                 }
+                                else {
+                                    process.exit();
+                                }
 
                             })
                         }
@@ -68,7 +74,7 @@ const init = function () {
                                 type: "list",
                                 message: "What would you like to add to profile:",
                                 name: "removeProfile",
-                                choices: ["Remove Employee", "Remove Department", "Remove Roles"]
+                                choices: ["Remove Employee", "Remove Department", "Remove Roles", "Exit"]
                             }).then((answer) => {
                                 if (answer.removeProfile === "Remove Employee") {
                                     removeEmployee();
@@ -79,6 +85,10 @@ const init = function () {
                                 else if (answer.removeProfile === "Remove Roles") {
                                     removeRoles();
                                 }
+                                else {
+                                    process.exit();
+
+                                }
 
                             })
                         }
@@ -87,7 +97,7 @@ const init = function () {
                                 type: "list",
                                 message: "What would you like to add to profile:",
                                 name: "updateProfile",
-                                choices: ["Update Employee role", "Update Employee Manager"]
+                                choices: ["Update Employee role", "Update Employee Manager", "Exit"]
                             }).then((answer) => {
                                 if (answer.updateProfile === "Update Employee role") {
                                     updateEmployeeRole();
@@ -95,8 +105,15 @@ const init = function () {
                                 else if (answer.updateProfile === "Update Employee Manager") {
                                     updateEmployeeManager();
                                 }
+                                else {
+                                    process.exit();
+
+                                }
 
                             })
+                        }
+                        else {
+                            process.exit();
                         }
                     })
             }
@@ -158,7 +175,7 @@ const viewEmployeebyDep = function () {
                             if (answer.department === data[i].department_name) {
                                 dataSortByDep.push(data[i]);
                             }
-                            
+
                         }
                         //loop to get mangername by managerID
                         for (let i = 0; i < data.length; i++) {
@@ -242,47 +259,78 @@ const addEmployee = function () {
             if (err) {
                 throw err
             }
-            connection.query("select role.title, role.id, role.department_id from role", (err, data) => {
-                let roleData = [];
+            connection.query("select * from role", (err, data) => {
                 if (err) {
                     throw err
                 }
+                let roleData = [];
+                //loop to get mangerlist
                 for (let i = 0; i < data.length; i++) {
                     roleData.push(data[i].title);
                 }
-                inquirer.prompt([{
+                inquirer.prompt({
                     type: "list",
                     message: "Enter employee's role",
                     name: "newEmployeeRole",
                     choices: roleData,
-                }, {
-                    type: "input",
-                    message: "Enter employee's manager ID",
-                    name: "newEmployeeManagerID"
-                }
-                ]).then((IDinfo) => {
-                    let newEmployeeID = "";
-                    connection.query("select * from role", (err, depdata) => {
+                }).then((role) => {
+                    for (let i = 0; i < data.length; i++) {
+                        if (role.newEmployeeRole === data[i].title) {
+                            newRoleID = data[i].id;
+                        };
+                    }
+                    connection.query("select * from employee", (err, result) => {
                         if (err) {
                             throw err
                         }
-                        for (let i = 0; i < depdata.length; i++) {
-                            if (IDinfo.newEmployeeRole === depdata[i].title) {
-                                newEmployeeID = depdata[i].id
-                            }
+                        let managerData = ["null"];
+                        //loop to get mangerlist
+                        for (let i = 0; i < result.length; i++) {
+                            managerData.push(result[i].first_name);
                         }
-                        connection.query(`insert into employee (first_name, last_name, role_id, manager_id) values("${name.newEmployeeFirstName}","${name.newEmployeeLastName}", ${newEmployeeID}, ${IDinfo.newEmployeeManagerID})`);
-                        console.log("Adding to profile...");
-                        console.log("Done!");
-                        connection.release();
-                        goBackorExist();
+                        inquirer.prompt({
+                            type: "list",
+                            message: "Enter employee's manager",
+                            name: "newEmployeeManager",
+                            choices: managerData,
+                        }).then((manager) => {
+                            for (let i = 0; i < result.length; i++) {
+                                if (manager.newEmployeeManager === result[i].first_name) {
+                                    newEmployeeManagerID = result[i].id;
+                                };
+                                newEmployeeManagerID = null;
+                            }
+                            if (newEmployeeManagerID == "null") {
+                                connection.query(`insert into employee (first_name, last_name, role_id) values ("${name.newEmployeeFirstName}", "${name.newEmployeeLastName}", ${newRoleID})`, (err) => {
+                                    if (err) {
+                                        throw err
+                                    }
+                                    console.log("Adding to profile...");
+                                    console.log("Done!");
+                                    connection.release();
+                                    goBackorExist();
+                                });
+                            }
+                            connection.query(`insert into employee (first_name, last_name, role_id, manager_id) values ("${name.newEmployeeFirstName}", "${name.newEmployeeLastName}", ${newRoleID}, ${newEmployeeManagerID})`, (err) => {
+                                if (err) {
+                                    throw err
+                                }
+                                console.log("Adding to profile...");
+                                console.log("Done!");
+                                connection.release();
+                                goBackorExist();
+                            });
+                           
+                        })
+                     
+                     
                     })
                 })
-
             })
         })
     })
 }
+      
 const addDepartment = function () {
     inquirer.prompt([
         {
@@ -312,13 +360,13 @@ const addRoles = function () {
         if (err) {
             throw err
         }
-        
+
         connection.query("select department_name, id from department", (err, data) => {
             let departmentsList = [];
             for (let i = 0; i < data.length; i++) {
                 departmentsList.push(data[i].department_name);
             }
-        
+
             inquirer.prompt([
                 {
                     type: "input",
@@ -404,7 +452,7 @@ const removeDepartment = function () {
                 name: "removeDepartment",
                 choices: departmentList,
             }).then((answer) => {
-                console.log(`${answer.removeDepartment} is removed!`);
+                console.log(`${answer.removeDepartment} department is removed!`);
                 connection.query(`delete from department where department.department_name = "${answer.removeDepartment}"`);
                 connection.release();
                 goBackorExist();
@@ -433,7 +481,7 @@ const removeRoles = function () {
                 name: "removeRole",
                 choices: roleList,
             }).then((answer) => {
-                console.log(`${answer.removeRole} is removed!`);
+                console.log(`${answer.removeRole} position is removed!`);
                 connection.query(`delete from role where role.title = "${answer.removeRole}"`);
                 connection.release();
                 goBackorExist();
@@ -441,7 +489,7 @@ const removeRoles = function () {
 
         })
     })
-    
+
 }
 const updateEmployeeRole = function () {
     pool.getConnection((err, connection) => {
@@ -501,7 +549,7 @@ const updateEmployeeManager = function () {
         if (err) {
             throw err
         }
-        connection.query("select id, employee.first_name, employee.last_name, employee.manager_id from employee", (err, data) => {
+        connection.query("select * from employee", (err, data) => {
             if (err) {
                 throw err
             }
@@ -512,7 +560,7 @@ const updateEmployeeManager = function () {
             inquirer.prompt([{
                 type: "list",
                 message: "Please select which employee you want to update!",
-                name: "employeeUpdateManagerName",
+                name: "employeeName",
                 choices: nameList,
             },
             {
@@ -520,14 +568,14 @@ const updateEmployeeManager = function () {
                 message: "Please select which manager you want to update to this employee!",
                 name: "employeeUpdateManager",
                 choices: nameList,
-                }]).then((employee) => {
-                    let newManagerId = 0;
+            }]).then((employee) => {
+                let newManagerId = 0;
                 //loop to assign manager by selected employee's name
                 for (let i = 0; i < data.length; i++) {
                     if (employee.employeeUpdateManager === data[i].first_name)
-                        newManagerID = data[i].id;
+                        newManagerId = data[i].id - 1 ;
                 }
-                connection.query(`update employee set employee.manager_id =${newManagerId} where employee.first_name = "${employee.employeeUpdateManagerName}"`, (err) => {
+                connection.query(`update employee set employee.manager_id =${newManagerId} where employee.first_name = "${employee.employeeName}"`, (err) => {
                     if (err) {
                         throw err
                     }
