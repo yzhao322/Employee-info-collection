@@ -9,6 +9,9 @@ const pool = mysql.createPool({
 })
 
 const init = function () {
+    for(let i = 1; i <= 3; i++) {
+        console.log("************************************************************");  
+      }
     pool.getConnection((err, connection) => {
         if (err) {
             throw err
@@ -38,9 +41,9 @@ const init = function () {
                                 viewEmployeebyManger(connection);
                             }
                             else {
+                                connection.release();
                                 process.exit();
                             }
-
                         })
                 }
                 else if (data.updateOrView === "Update Profile") {
@@ -68,6 +71,7 @@ const init = function () {
                                         addRoles(connection);
                                     }
                                     else {
+                                        connection.release();
                                         process.exit();
                                     }
 
@@ -90,6 +94,7 @@ const init = function () {
                                         removeRoles(connection);
                                     }
                                     else {
+                                        connection.release();
                                         process.exit();
 
                                     }
@@ -110,6 +115,7 @@ const init = function () {
                                         updateEmployeeManager(connection);
                                     }
                                     else {
+                                        connection.release();
                                         process.exit();
 
                                     }
@@ -117,9 +123,14 @@ const init = function () {
                                 })
                             }
                             else {
+                                connection.release();
                                 process.exit();
                             }
                         })
+                }
+                else {
+                    connection.release();
+                    process.exit();
                 }
             })
     })
@@ -534,7 +545,7 @@ const updateEmployeeManager = function (connection) {
             })
         })
 }
-const goBackorExist = function (connection) {
+const goBackorExist = function () {
     inquirer.prompt({
         type: "list",
         message: "Go Back or Exit?",
