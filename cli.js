@@ -9,9 +9,7 @@ const pool = mysql.createPool({
 })
 
 const init = function () {
-    for(let i = 1; i <= 3; i++) {
-        console.log("************************************************************");  
-      }
+    console.log("************************************************************");  
     pool.getConnection((err, connection) => {
         if (err) {
             throw err
@@ -139,7 +137,7 @@ const init = function () {
 
 
 const viewAllEmployees = function (connection) {
-        connection.query("select department.department_name, role.title, role.salary, employee.first_name, employee.last_name, employee.manager_id from department, role, employee where department.id = role.department_id and role.id = employee.role_id", (err, data) => {
+        connection.query("select department.department_name, role.title, role.salary, employee.first_name, employee.last_name, employee.manager_id, employee.id from department, role, employee where department.id = role.department_id and role.id = employee.role_id", (err, data) => {
             if (err) {
                 throw err
             }
@@ -148,6 +146,7 @@ const viewAllEmployees = function (connection) {
                 if (data[i].manager_id !== null) {
                     let manager = data[data[i].manager_id].first_name;
                     data[i].manager_id = manager;
+
                 }
             }
             console.table(data);
@@ -212,12 +211,16 @@ const viewEmployeebyManger = function (connection) {
                     manager.push(data[i].manager_id);
                 }
             }
+            //filter duplicate name
+            var mangerList = manager.filter((item, i, allItems) => {
+                return i == allItems.indexOf(item)
+            });
 
             inquirer.prompt({
                 type: "list",
                 message: "Please select which manager you are looking for?",
                 name: "managerID",
-                choices: manager,
+                choices: mangerList,
             })
                 .then((answer) => {
                     let dataSortByManagerID = [];
@@ -228,9 +231,6 @@ const viewEmployeebyManger = function (connection) {
                     for (let i = 0; i < data.length; i++) {
                         if (answer.managerID == data[i].manager_id) {
                             dataSortByManagerID.push(data[i]);
-                        }
-                        else {
-                            console.log(`We don't have ${answer.manager} manager!`);
                         }
                     }
                     console.table(dataSortByManagerID);
@@ -289,12 +289,23 @@ const addEmployee = function (connection) {
                             name: "newEmployeeManager",
                             choices: managerData,
                         }).then((manager) => {
-                            for (let i = 0; i < result.length; i++) {
-                                if (manager.newEmployeeManager === result[i].first_name) {
-                                    newEmployeeManagerID = result[i].id - 1;
+                            if (manager.newEmployeeManager !== "null") {
+                                for (let i = 0; i < result.length; i++) {
+                                    if (manager.newEmployeeManager === result[i].first_name) {
+                                        newEmployeeManagerID = result[i].id - 1;
+                                    }
                                 }
+                                connection.query(`insert into employee (first_name, last_name, role_id, manager_id) values ("${name.newEmployeeFirstName}", "${name.newEmployeeLastName}", ${newRoleID}, ${newEmployeeManagerID})`, (err) => {
+                                    if (err) {
+                                        throw err
+                                    }
+                                    console.log("Adding to profile...");
+                                    console.log("Done!");
+                                    connection.release();
+                                    goBackorExist();
+                                })
                             }
-                            if (newEmployeeManagerID == "null") {
+                            else if (manager.newEmployeeManager === "null") {
                                 connection.query(`insert into employee (first_name, last_name, role_id) values ("${name.newEmployeeFirstName}", "${name.newEmployeeLastName}", ${newRoleID})`, (err) => {
                                     if (err) {
                                         throw err
@@ -305,21 +316,7 @@ const addEmployee = function (connection) {
                                     goBackorExist();
                                 })
                             }
-                            else {
-                                connection.query(`insert into employee (first_name, last_name, role_id, manager_id) values ("${name.newEmployeeFirstName}", "${name.newEmployeeLastName}", ${newRoleID}, ${newEmployeeManagerID})`, (err) => {
-                                    if (err) {
-                                        throw err
-                                    }
-                                    console.log("Adding to profile...");
-                                    console.log("Done!");
-                                    connection.release();
-                                    goBackorExist();
-                                });
-                            }
-                           
                         })
-                     
-                     
                     })
                 })
             })
@@ -399,11 +396,15 @@ const removeEmployee = function (connection) {
             for (let i = 0; i < data.length; i++) {
                 removeList.push(data[i].first_name);
             }
+            //filter duplicate names
+            let removeEmployeeList = removeList.filter((item, i, allItems) => {
+                return i == allItems.indexOf(item)
+            });
             inquirer.prompt({
                 type: "list",
                 message: "Please select which employee info you want to remove!",
                 name: "removeemployee",
-                choices: removeList,
+                choices: removeEmployeeList,
             }).then((answer) => {
                 console.log(`${answer.removeemployee} is removed!`);
                 connection.query(`delete from employee where employee.first_name = "${answer.removeemployee}"`);
@@ -532,7 +533,7 @@ const updateEmployeeManager = function (connection) {
                 //loop to assign manager by selected employee's name
                 for (let i = 0; i < data.length; i++) {
                     if (employee.employeeUpdateManager === data[i].first_name)
-                        newManagerId = data[i].id - 1 ;
+                        newManagerId = data[i].id - 1;
                 }
                 connection.query(`update employee set employee.manager_id =${newManagerId} where employee.first_name = "${employee.employeeName}"`, (err) => {
                     if (err) {
