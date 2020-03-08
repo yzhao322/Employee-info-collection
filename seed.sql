@@ -29,16 +29,23 @@ values ("Finance"), ("Engineer"),("Marketing");
 insert into role(title, salary, department_id)
 values("Manager", 99999.99, 1),("Team Leader", 110000.00, 2), ("Sales", 88888.88, 3), ("Accounting", 88888.88, 1),("Engineer", 99999.99, 2);
 
-insert into employee (first_name, last_name, role_id, manager_id)
-values("Daniel","Yang",3,10955),("John","Smith",5,10900),("Austin","Green",4,10911);
-
 insert into employee (first_name, last_name, role_id)
 values ("Jason","Miller", 1),("Kevin","White", 1),("Peter","Lee",2);
+
+insert into employee (first_name, last_name, role_id, manager_id)
+values("Daniel","Yang",3,1),("John","Smith",5,2),("Austin","Green",4,1);
+
+
 
 
 select * from department;
 select * from role;
 select * from employee;
+
+alter table employee
+add manager varchar(30);
+update employee set manager = employee.first_name where manager_id in (id);
+
 
 
 

@@ -9,124 +9,125 @@ const pool = mysql.createPool({
 })
 
 const init = function () {
-    inquirer.prompt({
-        type: "list",
-        message: "What would you like to do?",
-        name: "updateOrView",
-        choices: ["View Profile", "Update Profile", "Exit"]
-    })
-        .then((data) => {
-            if (data.updateOrView === "View Profile") {
-                inquirer.prompt({
-                    type: "list",
-                    message: "How would you like to view profiles?",
-                    name: "viewProfiles",
-                    choices: ["View All Employees", "View Employees by Department", "View Employees by Manager", "Exit"]
-                })
-                    .then((data) => {
-                        if (data.viewProfiles === "View All Employees") {
-                            viewAllEmployees();
-                        }
-                        else if (data.viewProfiles === "View Employees by Department") {
-                            viewEmployeebyDep();
-                        }
-                        else if (data.viewProfiles === "View Employees by Manager") {
-                            viewEmployeebyManger();
-                        }
-                        else {
-                            process.exit();
-                        }
-
-                    })
-            }
-            else if (data.updateOrView === "Update Profile") {
-                inquirer.prompt({
-                    type: "list",
-                    message: "How would you like to update profiles?",
-                    name: "updateProfiles",
-                    choices: ["Add to Profile", "Remove From Profile", "Update Profile", "Exit"]
-                })
-                    .then((data) => {
-                        if (data.updateProfiles === "Add to Profile") {
-                            inquirer.prompt({
-                                type: "list",
-                                message: "What would you like to add to profile:",
-                                name: "AddProfile",
-                                choices: ["Add Employee", "Add Department", "Add Roles"]
-                            }).then((answer) => {
-                                if (answer.AddProfile === "Add Employee") {
-                                    addEmployee();
-                                }
-                                else if (answer.AddProfile === "Add Department") {
-                                    addDepartment();
-                                }
-                                else if (answer.AddProfile === "Add Roles") {
-                                    addRoles();
-                                }
-                                else {
-                                    process.exit();
-                                }
-
-                            })
-                        }
-                        else if (data.updateProfiles === "Remove From Profile") {
-                            inquirer.prompt({
-                                type: "list",
-                                message: "What would you like to add to profile:",
-                                name: "removeProfile",
-                                choices: ["Remove Employee", "Remove Department", "Remove Roles", "Exit"]
-                            }).then((answer) => {
-                                if (answer.removeProfile === "Remove Employee") {
-                                    removeEmployee();
-                                }
-                                else if (answer.removeProfile === "Remove Department") {
-                                    removeDepartment();
-                                }
-                                else if (answer.removeProfile === "Remove Roles") {
-                                    removeRoles();
-                                }
-                                else {
-                                    process.exit();
-
-                                }
-
-                            })
-                        }
-                        else if (data.updateProfiles === "Update Profile") {
-                            inquirer.prompt({
-                                type: "list",
-                                message: "What would you like to add to profile:",
-                                name: "updateProfile",
-                                choices: ["Update Employee role", "Update Employee Manager", "Exit"]
-                            }).then((answer) => {
-                                if (answer.updateProfile === "Update Employee role") {
-                                    updateEmployeeRole();
-                                }
-                                else if (answer.updateProfile === "Update Employee Manager") {
-                                    updateEmployeeManager();
-                                }
-                                else {
-                                    process.exit();
-
-                                }
-
-                            })
-                        }
-                        else {
-                            process.exit();
-                        }
-                    })
-            }
-        })
-
-}
-
-
-const viewAllEmployees = function () {
     pool.getConnection((err, connection) => {
         if (err) {
             throw err
         }
+        inquirer.prompt({
+            type: "list",
+            message: "What would you like to do?",
+            name: "updateOrView",
+            choices: ["View Profile", "Update Profile", "Exit"]
+        })
+            .then((data) => {
+                if (data.updateOrView === "View Profile") {
+                    inquirer.prompt({
+                        type: "list",
+                        message: "How would you like to view profiles?",
+                        name: "viewProfiles",
+                        choices: ["View All Employees", "View Employees by Department", "View Employees by Manager", "Exit"]
+                    })
+                        .then((data) => {
+                            if (data.viewProfiles === "View All Employees") {
+                                viewAllEmployees(connection);
+                            }
+                            else if (data.viewProfiles === "View Employees by Department") {
+                                viewEmployeebyDep(connection);
+                            }
+                            else if (data.viewProfiles === "View Employees by Manager") {
+                                viewEmployeebyManger(connection);
+                            }
+                            else {
+                                process.exit();
+                            }
+
+                        })
+                }
+                else if (data.updateOrView === "Update Profile") {
+                    inquirer.prompt({
+                        type: "list",
+                        message: "How would you like to update profiles?",
+                        name: "updateProfiles",
+                        choices: ["Add to Profile", "Remove From Profile", "Update Profile", "Exit"]
+                    })
+                        .then((data) => {
+                            if (data.updateProfiles === "Add to Profile") {
+                                inquirer.prompt({
+                                    type: "list",
+                                    message: "What would you like to add to profile:",
+                                    name: "AddProfile",
+                                    choices: ["Add Employee", "Add Department", "Add Roles"]
+                                }).then((answer) => {
+                                    if (answer.AddProfile === "Add Employee") {
+                                        addEmployee(connection);
+                                    }
+                                    else if (answer.AddProfile === "Add Department") {
+                                        addDepartment(connection);
+                                    }
+                                    else if (answer.AddProfile === "Add Roles") {
+                                        addRoles(connection);
+                                    }
+                                    else {
+                                        process.exit();
+                                    }
+
+                                })
+                            }
+                            else if (data.updateProfiles === "Remove From Profile") {
+                                inquirer.prompt({
+                                    type: "list",
+                                    message: "What would you like to add to profile:",
+                                    name: "removeProfile",
+                                    choices: ["Remove Employee", "Remove Department", "Remove Roles", "Exit"]
+                                }).then((answer) => {
+                                    if (answer.removeProfile === "Remove Employee") {
+                                        removeEmployee(connection);
+                                    }
+                                    else if (answer.removeProfile === "Remove Department") {
+                                        removeDepartment(connection);
+                                    }
+                                    else if (answer.removeProfile === "Remove Roles") {
+                                        removeRoles(connection);
+                                    }
+                                    else {
+                                        process.exit();
+
+                                    }
+
+                                })
+                            }
+                            else if (data.updateProfiles === "Update Profile") {
+                                inquirer.prompt({
+                                    type: "list",
+                                    message: "What would you like to add to profile:",
+                                    name: "updateProfile",
+                                    choices: ["Update Employee role", "Update Employee Manager", "Exit"]
+                                }).then((answer) => {
+                                    if (answer.updateProfile === "Update Employee role") {
+                                        updateEmployeeRole(connection);
+                                    }
+                                    else if (answer.updateProfile === "Update Employee Manager") {
+                                        updateEmployeeManager(connection);
+                                    }
+                                    else {
+                                        process.exit();
+
+                                    }
+
+                                })
+                            }
+                            else {
+                                process.exit();
+                            }
+                        })
+                }
+            })
+    })
+
+}
+
+
+const viewAllEmployees = function (connection) {
         connection.query("select department.department_name, role.title, role.salary, employee.first_name, employee.last_name, employee.manager_id from department, role, employee where department.id = role.department_id and role.id = employee.role_id", (err, data) => {
             if (err) {
                 throw err
@@ -139,17 +140,10 @@ const viewAllEmployees = function () {
                 }
             }
             console.table(data);
-            connection.release();
             goBackorExist();
         })
-    })
 }
-const viewEmployeebyDep = function () {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            throw err
-        }
-
+const viewEmployeebyDep = function (connection) {
         connection.query("select department.department_name from department", (err, data) => {
             let departments = [];
             if (err) {
@@ -191,15 +185,10 @@ const viewEmployeebyDep = function () {
                     })
                 })
         })
-    })
 
 }
 
-const viewEmployeebyManger = function () {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            throw err
-        }
+const viewEmployeebyManger = function (connection) {
         connection.query("select department.department_name, role.title, role.salary, employee.first_name, employee.last_name, employee.manager_id from department, role, employee where department.id = role.department_id and role.id = employee.role_id", (err, data) => {
             let manager = [];
             if (err) {
@@ -238,10 +227,9 @@ const viewEmployeebyManger = function () {
                     goBackorExist();
                 })
         })
-    })
 }
 
-const addEmployee = function () {
+const addEmployee = function (connection) {
     inquirer.prompt([
         {
             type: "input",
@@ -255,10 +243,6 @@ const addEmployee = function () {
         },
 
     ]).then((name) => {
-        pool.getConnection((err, connection) => {
-            if (err) {
-                throw err
-            }
             connection.query("select * from role", (err, data) => {
                 if (err) {
                     throw err
@@ -296,9 +280,8 @@ const addEmployee = function () {
                         }).then((manager) => {
                             for (let i = 0; i < result.length; i++) {
                                 if (manager.newEmployeeManager === result[i].first_name) {
-                                    newEmployeeManagerID = result[i].id;
-                                };
-                                newEmployeeManagerID = null;
+                                    newEmployeeManagerID = result[i].id - 1;
+                                }
                             }
                             if (newEmployeeManagerID == "null") {
                                 connection.query(`insert into employee (first_name, last_name, role_id) values ("${name.newEmployeeFirstName}", "${name.newEmployeeLastName}", ${newRoleID})`, (err) => {
@@ -309,17 +292,19 @@ const addEmployee = function () {
                                     console.log("Done!");
                                     connection.release();
                                     goBackorExist();
+                                })
+                            }
+                            else {
+                                connection.query(`insert into employee (first_name, last_name, role_id, manager_id) values ("${name.newEmployeeFirstName}", "${name.newEmployeeLastName}", ${newRoleID}, ${newEmployeeManagerID})`, (err) => {
+                                    if (err) {
+                                        throw err
+                                    }
+                                    console.log("Adding to profile...");
+                                    console.log("Done!");
+                                    connection.release();
+                                    goBackorExist();
                                 });
                             }
-                            connection.query(`insert into employee (first_name, last_name, role_id, manager_id) values ("${name.newEmployeeFirstName}", "${name.newEmployeeLastName}", ${newRoleID}, ${newEmployeeManagerID})`, (err) => {
-                                if (err) {
-                                    throw err
-                                }
-                                console.log("Adding to profile...");
-                                console.log("Done!");
-                                connection.release();
-                                goBackorExist();
-                            });
                            
                         })
                      
@@ -327,11 +312,10 @@ const addEmployee = function () {
                     })
                 })
             })
-        })
     })
 }
       
-const addDepartment = function () {
+const addDepartment = function (connection) {
     inquirer.prompt([
         {
             type: "input",
@@ -339,10 +323,7 @@ const addDepartment = function () {
             name: "newDepartmentName"
         },
     ]).then((name) => {
-        pool.getConnection((err, connection) => {
-            if (err) {
-                throw err
-            }
+      
             connection.query(`insert into department (department_name) values ("${name.newDepartmentName}")`, (err, data) => {
                 if (err) {
                     throw err
@@ -352,14 +333,9 @@ const addDepartment = function () {
                 goBackorExist();
             })
         })
-    })
 }
 
-const addRoles = function () {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            throw err
-        }
+const addRoles = function (connection) {
 
         connection.query("select department_name, id from department", (err, data) => {
             let departmentsList = [];
@@ -400,15 +376,10 @@ const addRoles = function () {
                     goBackorExist();
                 })
             })
-        })
     })
 }
 
-const removeEmployee = function () {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            throw err
-        }
+const removeEmployee = function (connection) {
         connection.query("select employee.first_name from employee", (err, data) => {
             if (err) {
                 throw err
@@ -430,14 +401,9 @@ const removeEmployee = function () {
             })
 
         })
-    })
 }
 
-const removeDepartment = function () {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            throw err
-        }
+const removeDepartment = function (connection) {
         connection.query("select department_name from department", (err, data) => {
             if (err) {
                 throw err
@@ -457,16 +423,10 @@ const removeDepartment = function () {
                 connection.release();
                 goBackorExist();
             })
-
-        })
     })
 }
 
-const removeRoles = function () {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            throw err
-        }
+const removeRoles = function (connection) {
         connection.query("select title from role", (err, data) => {
             if (err) {
                 throw err
@@ -488,14 +448,8 @@ const removeRoles = function () {
             })
 
         })
-    })
-
 }
-const updateEmployeeRole = function () {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            throw err
-        }
+const updateEmployeeRole = function (connection) {
         connection.query("select title, role.id, employee.first_name, employee.last_name, employee.role_id from role, employee where role.id = employee.role_id", (err, data) => {
             if (err) {
                 throw err
@@ -538,17 +492,11 @@ const updateEmployeeRole = function () {
                         }
                     }
                 })
-
-            })
         })
     })
 
 }
-const updateEmployeeManager = function () {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            throw err
-        }
+const updateEmployeeManager = function (connection) {
         connection.query("select * from employee", (err, data) => {
             if (err) {
                 throw err
@@ -585,9 +533,8 @@ const updateEmployeeManager = function () {
                 })
             })
         })
-    })
 }
-const goBackorExist = function () {
+const goBackorExist = function (connection) {
     inquirer.prompt({
         type: "list",
         message: "Go Back or Exit?",
